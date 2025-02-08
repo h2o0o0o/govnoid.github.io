@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Уродливый Калькулятор</title>
+    <style>
+        body {
+            background: repeating-linear-gradient(45deg, red, yellow 10px, lime 20px);
+            font-family: 'Comic Sans MS', cursive;
+            text-align: center;
+            color: blue;
+            animation: blink 0.5s infinite alternate;
+        }
+        @keyframes blink {
+            from { color: blue; }
+            to { color: purple; }
+        }
+        .container {
+            background: cyan;
+            border: 10px dashed magenta;
+            padding: 50px;
+            width: 50%;
+            margin: 100px auto;
+            box-shadow: 20px 20px 50px black;
+            transform: rotate(5deg);
+        }
+        input, button {
+            font-size: 20px;
+            padding: 10px;
+            border: 5px solid lime;
+            background: pink;
+            color: red;
+        }
+        button:hover {
+            background: yellow;
+            transform: scale(1.2) rotate(10deg);
+        }
+    </style>
+</head>
+<body>
+    <h1>Уродливый Калькулятор</h1>
+    <div class="container">
+        <input type="number" id="num1" placeholder="Число 1">
+        <select id="operator">
+            <option value="+">+</option>
+            <option value="-">-</option>
+            <option value="*">*</option>
+            <option value="/">/</option>
+        </select>
+        <input type="number" id="num2" placeholder="Число 2">
+        <button onclick="calculate()">Посчитать!</button>
+        <h2 id="result">Результат появится здесь!</h2>
+    </div>
+    <script>
+        function calculate() {
+            let num1 = parseFloat(document.getElementById('num1').value);
+            let num2 = parseFloat(document.getElementById('num2').value);
+            let operator = document.getElementById('operator').value;
+            let result;
+            switch (operator) {
+                case '+': result = num1 + num2; break;
+                case '-': result = num1 - num2; break;
+                case '*': result = num1 * num2; break;
+                case '/': result = num1 / num2; break;
+                default: result = 'Ошибка!';
+            }
+            document.getElementById('result').innerText = 'Результат: ' + result;
+        }
+    </script>
+</body>
+</html>
