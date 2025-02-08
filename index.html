@@ -1,72 +1,398 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Уродливый Калькулятор</title>
-    <style>
-        body {
-            background: repeating-linear-gradient(45deg, red, yellow 10px, lime 20px);
-            font-family: 'Comic Sans MS', cursive;
-            text-align: center;
-            color: blue;
-            animation: blink 0.5s infinite alternate;
-        }
-        @keyframes blink {
-            from { color: blue; }
-            to { color: purple; }
-        }
-        .container {
-            background: cyan;
-            border: 10px dashed magenta;
-            padding: 50px;
-            width: 50%;
-            margin: 100px auto;
-            box-shadow: 20px 20px 50px black;
-            transform: rotate(5deg);
-        }
-        input, button {
-            font-size: 20px;
-            padding: 10px;
-            border: 5px solid lime;
-            background: pink;
-            color: red;
-        }
-        button:hover {
-            background: yellow;
-            transform: scale(1.2) rotate(10deg);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Your Class Schedule</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --spacing: 20px;                    
+      --small-spacing: 10px;               
+      --card-padding: 20px;                
+      --card-margin: 20px;                 
+      --container-border-radius: var(--spacing);
+      --card-border-radius: 15px;            
+      --border-color: #2f8c42;
+      --primary-color: #2f8c42;
+      --background-color: #3a5a40;
+      --container-bg: rgba(255,255,255,0.97);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-color);
+      /* Black dots on background */
+      background-image: radial-gradient(circle, rgba(0,0,0,1) 1px, transparent 1px);
+      background-size: 60px 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      color: #333;
+    }
+    .toolbar {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 600px;
+      background: rgba(255,255,255,0.95);
+      border: 2px solid var(--border-color);
+      border-radius: 0 0 var(--spacing) var(--spacing);
+      padding: var(--small-spacing) var(--spacing);
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .toolbar-icon {
+      font-size: 28px;
+      margin-right: var(--small-spacing);
+    }
+    .toolbar-title {
+      font-size: 1.5em;
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    .container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      background: var(--container-bg);
+      border: 2px solid var(--border-color);
+      border-radius: var(--container-border-radius);
+      padding: var(--spacing);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--card-border-radius);
+      padding: var(--card-padding);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      margin-bottom: var(--card-margin);
+    }
+    .card:last-child {
+      margin-bottom: 0;
+    }
+    .card-header {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--small-spacing);
+      margin-bottom: var(--small-spacing);
+      cursor: pointer;
+      user-select: none;
+    }
+    .card-content {
+      line-height: 1.5;
+    }
+    /* Next Class collapse/expand */
+    .next-content {
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+      max-height: 500px;
+    }
+    .next-content.collapsed {
+      max-height: 0;
+    }
+    .lesson-name {
+      font-size: 1.1em;
+      font-weight: 500;
+      margin-bottom: var(--small-spacing);
+    }
+    .lesson-location,
+    .lesson-time,
+    .lesson-starts {
+      font-size: 0.9em;
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .progress-section {
+      margin-top: var(--small-spacing);
+    }
+    .time-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1em;
+      color: var(--primary-color);
+      padding: 0 var(--small-spacing);
+      margin-bottom: var(--small-spacing);
+    }
+    .timeline-container {
+      width: 100%;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .timeline {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary-color), #1b5e20);
+      border-radius: 10px;
+      transition: width 1s linear;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    }
+    /* Toggle indicator style */
+    #toggleIndicator {
+      float: right;
+      font-size: 1.2em;
+      color: var(--primary-color);
+    }
+    /* Chill Time message style */
+    .chill-message {
+      text-align: center;
+      color: var(--primary-color);
+      font-size: 1.2em;
+      font-weight: 500;
+    }
+    .chill-frog {
+      display: inline-block;
+      position: relative;
+      animation: moveFrog 3s linear infinite alternate;
+      font-size: 2em;
+      margin-bottom: var(--small-spacing);
+    }
+    @keyframes moveFrog {
+      0% { left: 0; }
+      100% { left: 50px; }
+    }
+  </style>
 </head>
 <body>
-    <h1>Уродливый Калькулятор</h1>
-    <div class="container">
-        <input type="number" id="num1" placeholder="Число 1">
-        <select id="operator">
-            <option value="+">+</option>
-            <option value="-">-</option>
-            <option value="*">*</option>
-            <option value="/">/</option>
-        </select>
-        <input type="number" id="num2" placeholder="Число 2">
-        <button onclick="calculate()">Посчитать!</button>
-        <h2 id="result">Результат появится здесь!</h2>
+  <div class="toolbar">
+    <div class="toolbar-icon">🐸</div>
+    <div class="toolbar-title">Class Scheduler</div>
+  </div>
+  <div class="container">
+    <div id="currentLessonCard" class="card">
+      <div class="card-header">Current Class</div>
+      <div class="card-content" id="currentLessonInfo"></div>
+      <div class="progress-section">
+        <div class="time-info">
+          <div id="elapsedTime"></div>
+          <div id="remainingTime"></div>
+        </div>
+        <div class="timeline-container">
+          <div id="timeline" class="timeline"></div>
+        </div>
+      </div>
     </div>
-    <script>
-        function calculate() {
-            let num1 = parseFloat(document.getElementById('num1').value);
-            let num2 = parseFloat(document.getElementById('num2').value);
-            let operator = document.getElementById('operator').value;
-            let result;
-            switch (operator) {
-                case '+': result = num1 + num2; break;
-                case '-': result = num1 - num2; break;
-                case '*': result = num1 * num2; break;
-                case '/': result = num1 / num2; break;
-                default: result = 'Ошибка!';
-            }
-            document.getElementById('result').innerText = 'Результат: ' + result;
+    <div id="nextLessonCard" class="card">
+      <div class="card-header" id="nextLessonHeader">
+        Next Class <span id="toggleIndicator">▼</span>
+      </div>
+      <div class="card-content next-content" id="nextLessonInfo"></div>
+    </div>
+  </div>
+  <script>
+    let isChillTime = false;
+    let chillInterval = null;
+    
+    function getCurrentLATime() {
+      return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+    }
+    
+    function getLessonDateTimes(lesson, allowCurrent = false) {
+      const nowLA = getCurrentLATime();
+      const currentDay = nowLA.getDay();
+      const lessonDay = lesson.dayNum;
+      const partsStart = lesson.start.split(":").map(Number);
+      const partsEnd = lesson.end.split(":").map(Number);
+      const lessonStart = new Date(nowLA.getFullYear(), nowLA.getMonth(), nowLA.getDate(), partsStart[0], partsStart[1], 0);
+      const lessonEnd = new Date(nowLA.getFullYear(), nowLA.getMonth(), nowLA.getDate(), partsEnd[0], partsEnd[1], 0);
+      let diff = lessonDay - currentDay;
+      if (diff < 0) diff += 7;
+      if (diff === 0) {
+        if (allowCurrent && nowLA >= lessonStart && nowLA <= lessonEnd) return { startDate: lessonStart, endDate: lessonEnd };
+        if (nowLA < lessonStart) return { startDate: lessonStart, endDate: lessonEnd };
+        lessonStart.setDate(lessonStart.getDate() + 7);
+        lessonEnd.setDate(lessonEnd.getDate() + 7);
+        return { startDate: lessonStart, endDate: lessonEnd };
+      } else {
+        lessonStart.setDate(lessonStart.getDate() + diff);
+        lessonEnd.setDate(lessonEnd.getDate() + diff);
+        return { startDate: lessonStart, endDate: lessonEnd };
+      }
+    }
+    
+    // Format time as M:SS or H:MM:SS (always with minutes as two digits)
+    function formatTime(totalSeconds) {
+      totalSeconds = Math.max(0, totalSeconds);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      if (hours > 0) {
+        return hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+      } else {
+        return minutes + ":" + String(seconds).padStart(2, "0");
+      }
+    }
+    
+    function pad(num) {
+      return num.toString().padStart(2, "0");
+    }
+    
+    const schedule = [
+      { day: "Monday", dayNum: 1, start: "11:00", end: "13:25", title: "BIOL 0002 - Botany", location: "S 112" },
+      { day: "Tuesday", dayNum: 2, start: "10:15", end: "12:20", title: "MATH 0027 - Trigonometry", location: "V 301" },
+      { day: "Tuesday", dayNum: 2, start: "12:30", end: "13:50", title: "CHEM 0001A - General Chemistry I (Lecture)", location: "S 101" },
+      { day: "Tuesday", dayNum: 2, start: "14:00", end: "17:05", title: "CHEM 0001A - General Chemistry I (Lab)", location: "ST-1 001" },
+      { day: "Wednesday", dayNum: 3, start: "11:00", end: "13:25", title: "BIOL 0002 - Botany", location: "S 112" },
+      { day: "Wednesday", dayNum: 3, start: "14:00", end: "15:05", title: "CHEM 0001X - Problem Solving for Chem 1A", location: "AT-2 002" },
+      { day: "Thursday", dayNum: 4, start: "10:15", end: "12:20", title: "MATH 0027 - Trigonometry", location: "V 301" },
+      { day: "Thursday", dayNum: 4, start: "12:30", end: "13:50", title: "CHEM 0001A - General Chemistry I (Lecture)", location: "S 101" },
+      { day: "Thursday", dayNum: 4, start: "14:00", end: "17:05", title: "CHEM 0001A - General Chemistry I (Lab)", location: "ST-1 001" }
+    ];
+    
+    const nowLA = getCurrentLATime();
+    const testStart = nowLA;
+    const testEnd = new Date(nowLA.getTime() + 60 * 1000);
+    const testLesson = { 
+      day: "Test", 
+      dayNum: nowLA.getDay(), 
+      start: pad(testStart.getHours()) + ":" + pad(testStart.getMinutes()), 
+      end: pad(testEnd.getHours()) + ":" + pad(testEnd.getMinutes()), 
+      title: "Test Lesson", 
+      location: "Online" 
+    };
+    schedule.unshift(testLesson);
+    
+    // Function to fetch random fact from the Useless Facts API
+    async function fetchRandomFact() {
+      try {
+        const response = await fetch('https://uselessfacts.jsph.pl/random.json?language=en');
+        const data = await response.json();
+        return data.text;
+      } catch (error) {
+        return "Frogs are amazing amphibians!";
+      }
+    }
+    
+    function startChillTime() {
+      const currentCard = document.getElementById("currentLessonInfo");
+      // Set Chill Time content with animated frog and a fact container
+      currentCard.innerHTML = `
+        <div class="chill-message">
+          <div class="chill-frog">🐸</div>
+          <div id="chillFact">Loading fact...</div>
+        </div>
+      `;
+      // Immediately fetch and display a random fact
+      fetchRandomFact().then(fact => {
+        document.getElementById("chillFact").textContent = fact;
+      });
+      // Update fact every 10 seconds
+      chillInterval = setInterval(() => {
+        fetchRandomFact().then(fact => {
+          document.getElementById("chillFact").textContent = fact;
+        });
+      }, 10000);
+    }
+    
+    function stopChillTime() {
+      clearInterval(chillInterval);
+      isChillTime = false;
+    }
+    
+    function updateSchedule() {
+      const nowLA = getCurrentLATime();
+      let currentLesson = null;
+      let nextLesson = null;
+      
+      schedule.forEach(function(lesson) {
+        const timesCurrent = getLessonDateTimes(lesson, true);
+        if (nowLA >= timesCurrent.startDate && nowLA <= timesCurrent.endDate) {
+          if (!currentLesson || timesCurrent.startDate < currentLesson.startDate) {
+            currentLesson = { lesson: lesson, startDate: timesCurrent.startDate, endDate: timesCurrent.endDate };
+          }
         }
-    </script>
+      });
+      
+      const compareTime = currentLesson ? currentLesson.endDate : nowLA;
+      
+      schedule.forEach(function(lesson) {
+        const timesNext = getLessonDateTimes(lesson, false);
+        if (timesNext.startDate > compareTime) {
+          if (!nextLesson || timesNext.startDate < nextLesson.startDate) {
+            nextLesson = { lesson: lesson, startDate: timesNext.startDate, endDate: timesNext.endDate };
+          }
+        }
+      });
+      
+      const currentCard = document.getElementById("currentLessonInfo");
+      const elapsedTime = document.getElementById("elapsedTime");
+      const remainingTime = document.getElementById("remainingTime");
+      const timelineDiv = document.getElementById("timeline");
+      const nextCard = document.getElementById("nextLessonInfo");
+      
+      if (currentLesson) {
+        if (isChillTime) { 
+          stopChillTime(); 
+        }
+        const elapsed = (nowLA - currentLesson.startDate) / 1000;
+        const remaining = (currentLesson.endDate - nowLA) / 1000;
+        const total = (currentLesson.endDate - currentLesson.startDate) / 1000;
+        const progressPercentage = (elapsed / total) * 100;
+        currentCard.innerHTML = `
+          <div class="lesson-name">${currentLesson.lesson.title}</div>
+          <div class="lesson-location">Location: ${currentLesson.lesson.location}</div>
+          <div class="lesson-time">${currentLesson.lesson.start} - ${currentLesson.lesson.end} (LA Time)</div>
+        `;
+        elapsedTime.innerHTML = formatTime(elapsed);
+        remainingTime.innerHTML = formatTime(remaining);
+        timelineDiv.style.width = progressPercentage + "%";
+      } else {
+        if (!isChillTime) {
+          isChillTime = true;
+          startChillTime();
+        }
+        elapsedTime.innerHTML = "";
+        remainingTime.innerHTML = "";
+        timelineDiv.style.width = "0%";
+      }
+      
+      if (nextLesson) {
+        const untilNext = (nextLesson.startDate - nowLA) / 1000;
+        nextCard.innerHTML = `
+          <div class="lesson-name">${nextLesson.lesson.title}</div>
+          <div class="lesson-location">Location: ${nextLesson.lesson.location}</div>
+          <div class="lesson-starts">Starts in: ${formatTime(untilNext)}</div>
+        `;
+      } else {
+        nextCard.innerHTML = `No upcoming classes`;
+      }
+    }
+    
+    updateSchedule();
+    setInterval(updateSchedule, 1000);
+    
+    // Toggle functionality for Next Class: clicking the header toggles the content
+    document.getElementById("nextLessonHeader").addEventListener("click", function() {
+      const nextContent = document.getElementById("nextLessonInfo");
+      const toggleIndicator = document.getElementById("toggleIndicator");
+      if (nextContent.classList.contains("collapsed")) {
+        nextContent.classList.remove("collapsed");
+        toggleIndicator.textContent = "▼";
+      } else {
+        nextContent.classList.add("collapsed");
+        toggleIndicator.textContent = "▲";
+      }
+    });
+  </script>
 </body>
 </html>
