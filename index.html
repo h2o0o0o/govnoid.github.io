@@ -176,9 +176,10 @@
       font-size: 2em;
       margin-bottom: var(--small-spacing);
     }
-    /* Liquid fade animation for fact changes */
+    /* Liquid fade and fluid height animation for fact changes */
     #chillFact {
-      transition: opacity 0.8s ease, transform 0.8s ease;
+      transition: opacity 0.8s ease, transform 0.8s ease, height 0.8s ease;
+      overflow: hidden;
     }
   </style>
 </head>
@@ -252,7 +253,7 @@
       }
     }
     
-    // Schedule: Only the original classes
+    // Schedule: Original classes only
     const schedule = [
       { day: "Monday", dayNum: 1, start: "11:00", end: "13:25", title: "BIOL 0002 - Botany", location: "S 112" },
       { day: "Tuesday", dayNum: 2, start: "10:15", end: "12:20", title: "MATH 0027 - Trigonometry", location: "V 301" },
@@ -287,21 +288,40 @@
           </div>
         </div>
       `;
+      // Immediately update the fact with a fluid height animation
       updateChillFact();
       chillInterval = setInterval(updateChillFact, 10000);
     }
     
     function updateChillFact() {
       const chillFactElement = document.getElementById("chillFact");
-      // Liquid fade effect
+      // Capture current height
+      chillFactElement.style.transition = "none";
+      const currentHeight = chillFactElement.offsetHeight;
+      chillFactElement.style.height = currentHeight + "px";
+      // Start fade-out and scale down
       chillFactElement.style.opacity = 0;
       chillFactElement.style.transform = "scale(0.8)";
+      
       fetchRandomFact().then(fact => {
         setTimeout(() => {
+          // Update the text
           chillFactElement.textContent = fact;
+          // Temporarily set height to auto to measure new height
+          chillFactElement.style.height = "auto";
+          const newHeight = chillFactElement.offsetHeight;
+          // Set back to old height, then animate to new height
+          chillFactElement.style.height = currentHeight + "px";
+          // Force reflow
           void chillFactElement.offsetWidth;
+          chillFactElement.style.transition = "height 0.8s ease, opacity 0.8s ease, transform 0.8s ease";
+          chillFactElement.style.height = newHeight + "px";
           chillFactElement.style.opacity = 1;
           chillFactElement.style.transform = "scale(1)";
+          // After transition, remove inline height so it can adjust naturally
+          setTimeout(() => {
+            chillFactElement.style.height = "auto";
+          }, 800);
         }, 500);
       });
     }
